@@ -1,0 +1,9 @@
+﻿  Source.cpp
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(191,29): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(284,18): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(285,18): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(289,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(290,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(291,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\anav2\source\repos\OpenGLTuts\Source.cpp(292,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  OpenGLTuts.vcxproj -> C:\Users\anav2\source\repos\OpenGLTuts\x64\Debug\OpenGLTuts.exe
