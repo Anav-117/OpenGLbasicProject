@@ -13,12 +13,18 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double Xpos, double Ypos);
 void scroll_callback(GLFWwindow* window, double Xoffset, double Yoffset);
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+//camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-float lastX = 400.0f, lastY = 300.0f;
 
 int main() {
 	//INITIALIZING GLFW
@@ -199,12 +205,12 @@ int main() {
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 project;
 
-		view = glm::lookAt(camera.cameraPos, camera.cameraFront + camera.cameraPos, camera.cameraUp);
+		view = camera.GetViewMatrix();
 
 		//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 		//project = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, -1.0f, 100.0f);
-		project = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 0.1f, 100.0f);
+		project = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		
 		/*int modelLoc = glGetUniformLocation(spShader.ID, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));*/
@@ -258,19 +264,14 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
-	const float cameraSpeed = 2.5f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camera.cameraPos += cameraSpeed * camera.cameraFront;
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camera.cameraPos -= cameraSpeed * camera.cameraFront;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		camera.cameraPos -= glm::normalize(glm::cross(camera.cameraFront, camera.cameraUp)) * cameraSpeed;
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		camera.cameraPos += glm::normalize(glm::cross(camera.cameraFront, camera.cameraUp)) * cameraSpeed;
-	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 //CALLBACK FOR ADJUSTING SIZE OF WINDOW
@@ -280,39 +281,22 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 
 void mouse_callback(GLFWwindow* window, double Xpos, double Ypos) {
-	if (camera.firstMouse) {
-		camera.lastX = Xpos;
-		camera.lastY = Ypos;
-		camera.firstMouse = false;
+	if (firstMouse)
+	{
+		lastX = Xpos;
+		lastY = Ypos;
+		firstMouse = false;
 	}
 
-	float Xoffset = Xpos - lastX;
-	float Yoffset = lastY - Ypos;
-	camera.lastX = Xpos;
-	camera.lastY = Ypos;
+	float xoffset = Xpos - lastX;
+	float yoffset = lastY - Ypos; // reversed since y-coordinates go from bottom to top
 
-	const float sensitivity = 0.1f;
-	Xoffset *= sensitivity;
-	Yoffset *= sensitivity;
+	lastX = Xpos;
+	lastY = Ypos;
 
-	camera.yaw += Xoffset;
-	camera.pitch += Yoffset;
-
-	if (camera.pitch > 89.0f)
-		camera.pitch = 89.0f;
-	if (camera.pitch < -89.0f)
-		camera.pitch = -89.0f;
-
-	camera.Direction.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
-	camera.Direction.y = sin(glm::radians(camera.pitch));
-	camera.Direction.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
-	camera.cameraFront = glm::normalize(camera.Direction);
+	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double Xoffset, double Yoffset) {
-	camera.fov -= (float)Yoffset;
-	if (camera.fov < 1.0f)
-		camera.fov = 1.0f;
-	if (camera.fov > 60.0f)
-		camera.fov = 60.0f;
+	camera.ProcessMouseScroll(Yoffset);
 }
